@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кибер-Кликер: 1 Минута</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-desc: #a4b0be;
+            --title-color: #00f2fe;
+            --title-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+            --score-color: #00ff88;
+            --score-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+            --timer-color: #ff4757;
+            --btn-bg: linear-gradient(45deg, #0072ff, #00f2fe);
+            --btn-shadow: 0 0 20px rgba(0, 114, 255, 0.5);
+            --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="light"] {
+            --bg-gradient: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(0, 0, 0, 0.05);
+            --text-main: #2f3542;
+            --text-desc: #57606f;
+            --title-color: #3742fa;
+            --title-shadow: 0 0 10px rgba(55, 66, 250, 0.2);
+            --score-color: #2ed573;
+            --score-shadow: 0 0 15px rgba(46, 213, 115, 0.3);
+            --timer-color: #ff6b81;
+            --btn-bg: linear-gradient(45deg, #3742fa, #2ed573);
+            --btn-shadow: 0 5px 15px rgba(55, 66, 250, 0.3);
+            --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 5px;
+            color: var(--title-color);
+            text-shadow: var(--title-shadow);
+        }
+
+        p {
+            color: var(--text-desc);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            padding: 25px 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-card);
+            text-align: center;
+            position: relative;
+            width: 280px;
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .timer-box {
+            color: var(--timer-color);
+        }
+
+        #score {
+            font-size: 56px;
+            font-weight: bold;
+            color: var(--score-color);
+            text-shadow: var(--score-shadow);
+            margin: 10px 0 20px 0;
+        }
+
+        button.click-btn {
+            background: var(--btn-bg);
+            color: white;
+            border: none;
+            padding: 16px 35px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: var(--btn-shadow);
+            transition: all 0.1s ease;
+            width: 100%;
+        }
+
+        button.click-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button.click-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        button.click-btn:disabled {
+            background: #747d8c;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <button class="theme-toggle" onclick="toggleTheme()">☀️ / 🌙</button>
+
+    <div class="game-card">
+        <h1>⚡ КИБЕР-КЛИКЕР</h1>
+        <p id="instruction">Успей за 60 секунд!</p>
+        
+        <div class="info-panel">
+            <div>Очки:</div>
+            <div class="timer-box">⏳ <span id="timer">60</span>с</div>
+        </div>
+
+        <div id="score">0</div>
+        <button id="actionBtn" class="click-btn" onclick="handleClick()">СТАРТ</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 60;
+        let gameTimer = null;
+        let isPlaying = false;
+
+        function handleClick() {
+            if (!isPlaying) {
+                startGame();
+            }
+            if (timeLeft > 0) {
+                score++;
+                document.getElementById('score').innerText = score;
+            }
+        }
+
+        function startGame() {
+            isPlaying = true;
+            document.getElementById('actionBtn').innerText = "КЛИК!";
+            document.getElementById('instruction').innerText = "Жми как можно быстрее!";
+
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            isPlaying = false;
+            document.getElementById('actionBtn').innerText = "СЫГРАТЬ ЕЩЕ";
+            document.getElementById('actionBtn').disabled = false;
+            document.getElementById('instruction').innerText = `Игра окончена! Твой счет: ${score}`;
+            
+            // Кнопка переключается на перезапуск игры
+            document.getElementById('actionBtn').setAttribute('onclick', 'resetGame()');
+        }
+
+        function resetGame() {
+            score = 0;
+            timeLeft = 60;
+            document.getElementById('score').innerText = score;
+            document.getElementById('timer').innerText = timeLeft;
+            document.getElementById('instruction').innerText = "Успей за 60 секунд!";
+            document.getElementById('actionBtn').innerText = "СТАРТ";
+            document.getElementById('actionBtn').setAttribute('onclick', 'handleClick()');
+            document.getElementById('actionBtn').disabled = false;
+        }
+
+        function toggleTheme() {
+            const body = document.documentElement;
+            const currentTheme = body.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+            }
+        }
+    </script>
+
+</body>
+</html>
